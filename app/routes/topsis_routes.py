@@ -4,8 +4,8 @@ API routes for TOPSIS Web Service
 
 from flask import Blueprint, request, jsonify
 import numpy as np
-from ..utils.topsis import TOPSIS, parse_weights, parse_impacts
-from ..models.schemas import TOPSISRequest, TOPSISResponse
+import json
+from ..utils.topsis import TOPSIS
 
 # Create blueprint
 topsis_bp = Blueprint('topsis', __name__, url_prefix='/api/topsis')
@@ -21,8 +21,7 @@ def evaluate():
         "decision_matrix": [[row1], [row2], ...],
         "weights": [w1, w2, ...],
         "impacts": ["benefit", "cost", ...],
-        "alternative_names": ["Alt1", "Alt2", ...],
-        "criterion_names": ["C1", "C2", ...]
+        "email": "user@example.com"
     }
     """
     try:
@@ -47,11 +46,10 @@ def evaluate():
             }), 400
         
         # Parse input data
-        decision_matrix = np.array(data['decision_matrix'])
-        weights = np.array(data['weights'])
+        decision_matrix = np.array(data['decision_matrix'], dtype=float)
+        weights = np.array(data['weights'], dtype=float)
         impacts = data['impacts']
-        alternative_names = data.get('alternative_names', [])
-        criterion_names = data.get('criterion_names', [])
+        email = data.get('email', '')
         
         # Validate matrix dimensions
         if decision_matrix.ndim != 2:
@@ -89,12 +87,8 @@ def evaluate():
                     'error': 'Invalid impact value'
                 }), 400
         
-        # Set default names if not provided
-        if not alternative_names:
-            alternative_names = [f'Alternative_{i+1}' for i in range(n_alternatives)]
-        
-        if not criterion_names:
-            criterion_names = [f'Criterion_{i+1}' for i in range(n_criteria)]
+        # Set default alternative names
+        alternative_names = [f'Alternative_{i+1}' for i in range(n_alternatives)]
         
         # Normalize weights
         weights = weights / np.sum(weights)
@@ -116,7 +110,8 @@ def evaluate():
         # Sort by rank
         results.sort(key=lambda x: x['rank'])
         
-        response = {
+        # Save results to JSON
+        response_data = {
             'success': True,
             'message': 'TOPSIS evaluation completed successfully',
             'data': {
@@ -130,7 +125,12 @@ def evaluate():
             }
         }
         
-        return jsonify(response), 200
+        # TODO: Send email to user with results
+        # For now, just log the email address
+        if email:
+            print(f"Results would be sent to: {email}")
+        
+        return jsonify(response_data), 200
     
     except ValueError as e:
         return jsonify({
