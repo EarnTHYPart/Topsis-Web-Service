@@ -77,4 +77,4 @@ MIT License
 
 ## Author
 
-EarnTHYPart
+Arjun Angirus
