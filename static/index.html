@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOPSIS MCDM Web Service</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎯 TOPSIS MCDM Analysis</h1>
+            <p>Technique for Order Preference by Similarity to Ideal Solution</p>
+        </header>
+
+        <div class="main-card">
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('manual')">Manual Input</button>
+                <button class="tab-button" onclick="switchTab('examples')">Load Example</button>
+                <button class="tab-button" onclick="switchTab('about')">About TOPSIS</button>
+            </div>
+
+            <!-- Manual Input Tab -->
+            <div id="manual-tab" class="tab-content active">
+                <form id="topsisForm">
+                    <div class="form-section">
+                        <h3>Decision Matrix</h3>
+                        <div class="matrix-builder">
+                            <div class="matrix-controls">
+                                <div class="form-group">
+                                    <label class="form-label">Alternatives</label>
+                                    <input type="number" id="numAlternatives" min="2" max="20" value="3"
+                                        class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Criteria</label>
+                                    <input type="number" id="numCriteria" min="2" max="10" value="3" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-secondary" onclick="buildMatrix()">Build
+                                        Matrix</button>
+                                </div>
+                            </div>
+                            <div id="matrixPreview"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Criteria Configuration</h3>
+                        <div id="criteriaConfig"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span>🚀</span> Evaluate with TOPSIS
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <span>🔄</span> Reset Form
+                        </button>
+                    </div>
+                </form>
+
+                <div id="results" class="hidden"></div>
+            </div>
+
+            <!-- Examples Tab -->
+            <div id="examples-tab" class="tab-content">
+                <div class="form-section">
+                    <h3>Pre-configured Examples</h3>
+                    <p class="help-text">Click on any example to load it into the form</p>
+                </div>
+
+                <div class="example-card" onclick="loadExample('project')">
+                    <h4>📊 Project Selection</h4>
+                    <p>Compare 3 projects based on Cost Efficiency, Quality, and Speed</p>
+                </div>
+
+                <div class="example-card" onclick="loadExample('vendor')">
+                    <h4>🏢 Vendor Selection</h4>
+                    <p>Evaluate 4 vendors across Quality, Reliability, Price, and Support</p>
+                </div>
+
+                <div class="example-card" onclick="loadExample('car')">
+                    <h4>🚗 Car Purchase Decision</h4>
+                    <p>Compare 3 cars based on Performance, Comfort, Price, and Fuel Efficiency</p>
+                </div>
+
+                <div class="example-card" onclick="loadExample('realestate')">
+                    <h4>🏠 Real Estate Investment</h4>
+                    <p>Analyze 4 properties considering Location, Amenities, Price, Space, and Safety</p>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div id="about-tab" class="tab-content">
+                <div class="form-section">
+                    <h3>What is TOPSIS?</h3>
+                    <p style="line-height: 1.8; color: var(--text-secondary); margin-bottom: 20px;">
+                        TOPSIS (Technique for Order Preference by Similarity to Ideal Solution) is a multi-criteria
+                        decision-making method that ranks alternatives based on their geometric distance from the
+                        ideal best and ideal worst solutions.
+                    </p>
+                </div>
+
+                <div class="form-section">
+                    <h3>How TOPSIS Works</h3>
+                    <ol style="line-height: 2; color: var(--text-secondary); margin-left: 20px;">
+                        <li><strong>Normalize</strong> the decision matrix using vector normalization</li>
+                        <li><strong>Calculate</strong> weighted normalized matrix using criterion weights</li>
+                        <li><strong>Determine</strong> ideal best and ideal worst solutions</li>
+                        <li><strong>Compute</strong> separation distances from ideal solutions</li>
+                        <li><strong>Calculate</strong> TOPSIS scores (0 to 1, higher is better)</li>
+                        <li><strong>Rank</strong> alternatives in descending order of scores</li>
+                    </ol>
+                </div>
+
+                <div class="form-section">
+                    <h3>Key Concepts</h3>
+                    <div style="line-height: 1.8; color: var(--text-secondary);">
+                        <p><strong>Benefit Criteria:</strong> Higher values are better (e.g., Quality, Speed)</p>
+                        <p><strong>Cost Criteria:</strong> Lower values are better (e.g., Price, Risk)</p>
+                        <p><strong>Weights:</strong> Relative importance of each criterion (will be normalized to sum to
+                            1)</p>
+                        <p><strong>Score:</strong> Ranges from 0 to 1, where 1 = closest to ideal solution</p>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>API Endpoints</h3>
+                    <div
+                        style="background: var(--bg-light); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.9rem;">
+                        <p><strong>POST</strong> /api/topsis/evaluate - Perform TOPSIS evaluation</p>
+                        <p><strong>GET</strong> /api/topsis/health - Check API health</p>
+                        <p><strong>GET</strong> /api/topsis/info - Get method information</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>TOPSIS MCDM Web Service v1.0.0</p>
+            <p>View on <a href="https://github.com/EarnTHYPart/Topsis-Web-Service" target="_blank">GitHub</a></p>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

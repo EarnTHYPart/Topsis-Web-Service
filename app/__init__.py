@@ -2,9 +2,10 @@
 Flask application factory and configuration
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from .routes.topsis_routes import topsis_bp
+import os
 
 
 def create_app(config=None):
@@ -17,7 +18,9 @@ def create_app(config=None):
     Returns:
         Flask app instance
     """
-    app = Flask(__name__)
+    app = Flask(__name__, 
+                static_folder='../static',
+                static_url_path='/static')
     
     # Configure app
     if config:
@@ -52,6 +55,14 @@ def create_app(config=None):
     # Root endpoint
     @app.route('/')
     def index():
+        return send_from_directory(app.static_folder, 'index.html')
+    
+    @app.route('/favicon.ico')
+    def favicon():
+        return '', 204
+    
+    @app.route('/home')
+    def home():
         return jsonify({
             'success': True,
             'message': 'TOPSIS MCDM Web Service',

@@ -4,8 +4,7 @@ This module provides the core TOPSIS algorithm for Multi-Criteria Decision Makin
 """
 
 import numpy as np
-import pandas as pd
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Dict
 
 
 class TOPSIS:
@@ -181,9 +180,9 @@ class TOPSIS:
     
     def get_results_dataframe(self, scores: np.ndarray, 
                              ranks: np.ndarray,
-                             alternative_names: List[str] = None) -> pd.DataFrame:
+                             alternative_names: List[str] = None) -> List[Dict]:
         """
-        Get results as a pandas DataFrame.
+        Get results as a list of dictionaries (pandas-free).
         
         Args:
             scores: TOPSIS scores
@@ -191,20 +190,23 @@ class TOPSIS:
             alternative_names: Names of alternatives (optional)
             
         Returns:
-            DataFrame with results
+            List of result dictionaries sorted by rank
         """
         if alternative_names is None:
             alternative_names = [f"Alternative_{i+1}" for i in range(len(scores))]
         
-        results_df = pd.DataFrame({
-            'Alternative': alternative_names,
-            'TOPSIS_Score': scores,
-            'Rank': ranks
-        })
+        results = []
+        for i, (name, score, rank) in enumerate(zip(alternative_names, scores, ranks)):
+            results.append({
+                'Alternative': name,
+                'TOPSIS_Score': float(score),
+                'Rank': int(rank)
+            })
         
-        results_df = results_df.sort_values('Rank').reset_index(drop=True)
+        # Sort by rank
+        results.sort(key=lambda x: x['Rank'])
         
-        return results_df
+        return results
 
 
 def parse_impacts(impacts_str: str) -> List[str]:
